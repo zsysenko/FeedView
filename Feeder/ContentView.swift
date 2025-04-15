@@ -36,6 +36,14 @@ struct ContentView: View {
             }
             
         }
+        .overlay(alignment: .top) {
+            Text("Current page: \(index)")
+                .font(.headline)
+                .padding()
+                .background(.ultraThinMaterial)
+                .cornerRadius(10)
+                .padding(.top, 40)
+        }
     }
 }
 
