@@ -7,6 +7,13 @@
 
 import SwiftUI
 
+
+enum FeedViewStyle {
+    case plain
+    case rotation
+    case cardFlip
+}
+
 struct FeedView<Data, Content>: View where Data: RandomAccessCollection,
                                            Data.Element: Identifiable,
                                            Content: View {
@@ -15,13 +22,21 @@ struct FeedView<Data, Content>: View where Data: RandomAccessCollection,
     
     private let data: Data
     private let content: ContentClosure
+    private let style: FeedViewStyle
     
-    @Binding var currentIndex: Int
+    @Binding var pageIndex: Int
     
-    init(data: Data, currentIndex: Binding<Int>, @ViewBuilder content: @escaping ContentClosure) {
+    init(
+        data: Data,
+        currentIndex: Binding<Int>,
+        style: FeedViewStyle = .cardFlip,
+        @ViewBuilder content: @escaping ContentClosure
+    ) {
         self.data = data
         self.content = content
-        self._currentIndex = currentIndex
+        self.style = style
+        
+        self._pageIndex = currentIndex
     }
     
     var body: some View {
@@ -31,62 +46,60 @@ struct FeedView<Data, Content>: View where Data: RandomAccessCollection,
                     ForEach(Array(data.enumerated()), id: \.0) { index, item in
                         content(item)
                             .frame(width: geometry.size.width, height: geometry.size.height)
-                            .background { GeometryReader { geometry in
-                                let frame = geometry.frame(in: .global)
-                                Color.clear
-                                    .preference(
-                                        key: ViewOffsetPreferenceKey.self,
-                                        value: [index : frame.midY]
-                                    )
-                            }}
-                            .scrollTransition { content, phase in
-                                content
-                                    .rotation3DEffect(
-                                        .degrees(-phase.value * 90),
-                                        axis: (x: 1, y: 0, z: 0),
-                                        anchor: UnitPoint.anchor(phaseValue: phase.value),
-                                        perspective: 1
-                                    )
-                                    .opacity(1 - abs(phase.value) * 0.5)
-                            }
+                            .trackScrollOffset(index: index)
+                            .applyScrollTransitionStyle(style)
                     }
                 }
             }
+            .scrollIndicators(.hidden)
             .scrollTargetBehavior(.paging)
-            .onPreferenceChange(ViewOffsetPreferenceKey.self) { values in
-                     let screenCenterY = geometry.frame(in: .global).midY
-                     let closest = values.min(by: {
-                         abs($0.value - screenCenterY) < abs($1.value - screenCenterY)
-                     })
-                     if let closestIndex = closest?.key {
-                         currentIndex = closestIndex
-                     }
-                 }
+            .onIndexChange(geometry: geometry) { index in
+                pageIndex = index
+            }
         }
         .ignoresSafeArea()
     }
 }
 
-private extension UnitPoint {
-    static func anchor(phaseValue: Double) -> UnitPoint {
-        if phaseValue < 0 {
-            return .bottom
-        } else if phaseValue == 0 {
-            return .center
-        } else if phaseValue > 0 {
-            return .top
+private extension View {
+    
+    @ViewBuilder
+    func applyScrollTransitionStyle(_ style: FeedViewStyle) -> some View {
+        switch style {
+            case .plain:
+                self.scrollTransition { content, phase in
+                    content
+                        .blur(radius: abs(phase.value) * 7)
+                        .opacity(1 - abs(phase.value) * 0.25)
+                }
+                
+            case .rotation:
+                self.scrollTransition { content, phase in
+                    content
+                        .rotation3DEffect(
+                            .degrees(-phase.value * 90),
+                            axis: (x: 1, y: 0, z: 0),
+                            anchor: UnitPoint(x: 0.5, y: 0.5 - phase.value * 0.5),
+                            perspective: 1.5
+                        )
+                        .opacity(1 - abs(phase.value) * 0.25)
+                }
+            case .cardFlip:
+                self.scrollTransition { content, phase in
+                    content
+                        .rotation3DEffect(
+                            .degrees(-phase.value * 180),
+                            axis: (x: 0, y: 1, z: 0),
+                            anchor: .center
+                        )
+                        .opacity(1 - abs(phase.value) * 0.25)
+                }
         }
-        return .center
+        
     }
 }
 
-private struct ViewOffsetPreferenceKey: PreferenceKey {
-    static var defaultValue: [Int: CGFloat] = [:]
-    
-    static func reduce(value: inout [Int: CGFloat], nextValue: () -> [Int: CGFloat]) {
-        value.merge(nextValue(), uniquingKeysWith: { $1 })
-    }
-}
+
 
 struct PreviewContent: View {
     @State private var index = 0
@@ -104,7 +117,7 @@ struct PreviewContent: View {
                 
                 Text(item.title)
                     .foregroundStyle(.white)
-                    .font(.title)
+                    .font(.system(size: 50, weight: .bold))
             }
         }
         .overlay(alignment: .top) {
@@ -120,4 +133,5 @@ struct PreviewContent: View {
 
 #Preview {
     PreviewContent()
+        .background(Color.black)
 }

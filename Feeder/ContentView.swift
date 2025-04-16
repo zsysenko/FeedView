@@ -20,21 +20,19 @@ struct ContentView: View {
     @State private var index = 0
     
     let values = [
-        FeedItem(title: "One", color: .blue),
-        FeedItem(title: "Two", color: .yellow),
-        FeedItem(title: "Three", color: .green)
+        FeedItem(title: "First", color: .blue),
+        FeedItem(title: "Second", color: .yellow),
+        FeedItem(title: "Third", color: .green)
     ]
     
     var body: some View {
-        FeedView(data: values, currentIndex: $index) { item in
+        FeedView(data: values, currentIndex: $index, style: .rotation) { item in
             ZStack {
                 Color(item.color)
-                
                 Text(item.title)
                     .foregroundStyle(.white)
-                    .font(.title)
+                    .font(.system(size: 50, weight: .bold))
             }
-            
         }
         .overlay(alignment: .top) {
             Text("Current page: \(index)")
