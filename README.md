@@ -42,7 +42,7 @@ Perfect for modern onboarding screens, story feeds, carousels, and more.
 }
 ```
 
-</td> <td width="50%"> <div align="center"> <img src="Feeder/Previews/preview_plain.gif" width="50%" /> </div? </td> </tr> 
+</td> <td width="50%"> <div align="center"> <img src="Feeder/Previews/preview_plain.gif" width="75%" /> </div? </td> </tr> 
 
 <tr>
 <td width="50%">
@@ -60,7 +60,7 @@ Perfect for modern onboarding screens, story feeds, carousels, and more.
 }
 ```
 
-</td> <td width="50%"> <div align="center"> <img src="Feeder/Previews/preview_rotation.gif" width="50%" /> </div? </td> </tr> 
+</td> <td width="50%"> <div align="center"> <img src="Feeder/Previews/preview_rotation.gif" width="75%" /> </div? </td> </tr> 
 
 <tr>
 <td width="50%">
@@ -77,5 +77,5 @@ Perfect for modern onboarding screens, story feeds, carousels, and more.
 }
 ```
 
-</td> <td width="50%"> <div align="center"> <img src="Feeder/Previews/preview_cardFlip.gif" width="50%" /> </div? </td> </tr> 
+</td> <td width="50%"> <div align="center"> <img src="Feeder/Previews/preview_cardFlip.gif" width="75%" /> </div? </td> </tr> 
 </table> 
